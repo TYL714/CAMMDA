@@ -32,10 +32,9 @@ def print_met(scores):
 
 
 def prepare_graphs(data, args):
-    # Same k_matrix and undirected NX graph construction as MAMFGAT/train.py.
+   
     mm_matrix = k_matrix(data['ms'], args.neighbor)
     dd_matrix = k_matrix(data['ds'], args.neighbor)
-    # from_numpy_array is the NetworkX >= 3 equivalent of from_numpy_matrix.
     nx_from_numpy = getattr(nx, 'from_numpy_matrix', nx.from_numpy_array)
     mm_graph = dgl.from_networkx(nx_from_numpy(mm_matrix))
     dd_graph = dgl.from_networkx(nx_from_numpy(dd_matrix))
@@ -54,7 +53,6 @@ def prepare_graphs(data, args):
 def evaluate_fold(y_true, scores):
     scores = np.asarray(scores).reshape(-1)
     y_true = np.asarray(y_true).reshape(-1).astype(int)
-    # Same MAMFGAT metrics/threshold definition.
     fpr, tpr, thresholds = roc_curve(y_true, scores)
     optimal_idx = np.argmax(tpr - fpr)
     optimal_threshold = float(thresholds[optimal_idx])
@@ -77,15 +75,13 @@ def train(data, args):
     all_score = []
     samples = data['train_samples']
     kf = KFold(n_splits=kfolds, shuffle=True, random_state=1)
-    # Identical sampled rows and KFold indices as MAMFGAT.
+ 
     train_idx, valid_idx = [], []
     for idx_train, idx_val in kf.split(samples):
         train_idx.append(idx_train)
         valid_idx.append(idx_val)
 
-    # These graphs depend only on global preprocessed data, not on epoch/fold.
-    # Building them once gives the same adjacency/matrices as the original
-    # per-epoch construction (but avoids repeatedly doing identical work).
+    
     mm_graph, dd_graph, md_graph, miRNA_th, disease_th = prepare_graphs(data, args)
     if args.save_score:
         os.makedirs(args.result_dir, exist_ok=True)
@@ -101,8 +97,7 @@ def train(data, args):
         labels = th.tensor(a[:, 2], dtype=th.float32, device=device)
         valid_pairs = b[:, :2]
 
-        # CAMMDA loss is BCE as specified in its Methods, unlike MAMFGAT's
-        # model-specific extra contrastive terms; no hard-negative mining.
+       
         progress = trange(args.epochs, desc='train fold %d' % (fold + 1))
         for epoch in progress:
             model.train()
