@@ -1,4 +1,4 @@
-# CAMMDA — aligned with the supplied MAMFGAT protocol
+
 
 ## Project structure
 
